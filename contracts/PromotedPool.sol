@@ -1,7 +1,7 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.4;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
+import "../node_modules/@openzeppelin/contracts/ownership/Ownable.sol";
 import "./Strings.sol";
 
 contract OwnableDelegateProxy { }
@@ -59,7 +59,7 @@ contract PromotedPool is ERC721Full, Ownable {
     require(_startTime > now, "Token must have start time in the future.");
     require(_startTime > promotionPeriods[currentTokenId].endTime, "Token must have start time > most recent token's end time");
     if(promotionPeriods[currentTokenId].endTime != 0) {
-      require(_startTime - promotionPeriods[currentTokenId].endTime < 7890000 , "Token must have start time < 1 year after the most recent token's end time");
+      require(_startTime - promotionPeriods[currentTokenId].endTime < 7890000, "Token must have start time < 1 year after the most recent token's end time");
     }
     uint256 newTokenId = _getNextTokenId();
     _mint(_to, newTokenId);
@@ -141,7 +141,7 @@ contract PromotedPool is ERC721Full, Ownable {
   }
 
   /**
-    * @dev calculates the next token ID based on value of currentTokenId 
+    * @dev calculates the next token ID based on value of currentTokenId
     * @return uint256 for the next token ID
     */
   function _getNextTokenId() private view returns (uint256) {
@@ -149,7 +149,7 @@ contract PromotedPool is ERC721Full, Ownable {
   }
 
   /**
-    * @dev increments the value of currentTokenId 
+    * @dev increments the value of currentTokenId
     */
   function _incrementTokenId() private  {
     currentTokenId++;

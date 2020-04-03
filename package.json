@@ -11,10 +11,11 @@
   "homepage": "https://pools.fyi",
   "dependencies": {
     "@0x/subproviders": "6.0.4",
+    "@openzeppelin/contracts": "^2.4.0",
     "@truffle/hdwallet-provider": "^1.0.0",
     "axios": "latest",
     "opensea-js": "latest",
-    "@openzeppelin/contracts": "^2.4.0",
+    "solc": "^0.6.4",
     "truffle": "^5.1.0",
     "truffle-flattener": "^1.4.0",
     "truffle-plugin-verify": "^0.3.0",
