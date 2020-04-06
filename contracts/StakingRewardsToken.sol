@@ -1,4 +1,4 @@
-pragma solidity ^0.6.4;
+pragma solidity ^0.5.1;
 
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
 import "../node_modules/@openzeppelin/contracts/ownership/Ownable.sol";
@@ -11,10 +11,10 @@ contract ProxyRegistry {
 }
 
 /**
- * @title Promoted Pool
- * Promoted Pool - ERC721 contract that gives the holder the right to promote a pool on pools.fyi during the specified timeframe.
+ * @title Staking Rewards Token
+ * Staking Rewards Token - ERC721 contract that gives the holder the right to define either the asset of the day on stakingrewards.com.
  */
-contract PromotedPool is ERC721Full, Ownable {
+contract StakingRewardsToken is ERC721Full, Ownable {
   using Strings for string;
 
   address proxyRegistryAddress;
@@ -22,26 +22,34 @@ contract PromotedPool is ERC721Full, Ownable {
   uint256 public activeTokenId;
   uint8 public currentTermsVersion;
 
-  struct PromotionPeriod {
+  enum TokenType { Asset, Provider, Article }
+
+  struct Period {
     uint256 startTime;
     uint256 endTime;
   }
 
-  struct PoolProposal {
+  struct Proposal {
     address proposedPool;
     address approvedPool;
   }
 
-  mapping (uint256 => PromotionPeriod) promotionPeriods;
-  mapping (uint256 => PoolProposal) proposedPools;
-  mapping (uint256 => uint8) termsVersions;
+  struct Token {
+    Period validPeriod;
+    Proposal proposal;
+    string metaHash;
+    uint8 termsVersion;
+    TokenType tokenType;
+  }
+
+  mapping (uint256 => Token) tokens;
   mapping (uint8 => string) terms;
 
-  event MintedToken(uint256 indexed tokenId, address indexed tokenOwner, uint256 indexed startTime, uint256 endTime);
-  event PromotedPoolProposed(address indexed poolAddress, uint256 indexed tokenId, uint256 indexed startTime, uint256 endTime);
-  event PromotedPoolApproved(address indexed poolAddress, uint256 indexed tokenId, uint256 indexed startTime, uint256 endTime);
+  event MintedToken(uint256 indexed tokenId, address indexed tokenOwner, uint256 indexed startTime, uint256 endTime, TokenType tokenType);
+  event NewProposalSubmitted(address indexed poolAddress, uint256 indexed tokenId, uint256 indexed startTime, uint256 endTime);
+  event ProposalApproved(address indexed poolAddress, uint256 indexed tokenId, uint256 indexed startTime, uint256 endTime);
   event ActiveTokenUpdated(uint256 indexed tokenId);
-  event PromotedPoolReset(uint256 indexed tokenId);
+  event PromotionResetted(uint256 indexed tokenId);
 
   constructor(string memory _name, string memory _symbol, address _proxyRegistryAddress) ERC721Full(_name, _symbol) public {
     proxyRegistryAddress = _proxyRegistryAddress;
@@ -54,24 +62,42 @@ contract PromotedPool is ERC721Full, Ownable {
     * @param _endTime timestamp when token expires
     * @param _termsHash hash of the terms and conditions associated with this token
     * @param _termsVersion version number of the terms and conditions
+    * @param _metaHash hash of the metadata associated with this token
+    * @param _tokenType type of the new token
     */
-  function mintTo(address _to, uint256 _startTime, uint256 _endTime, string memory _termsHash, uint8 _termsVersion) public onlyOwner {
+  function mintTo(
+    address _to,
+    uint256 _startTime,
+    uint256 _endTime,
+    string memory _termsHash,
+    uint8 _termsVersion,
+    string memory _metaHash,
+    TokenType _tokenType
+  ) public onlyOwner {
     require(_startTime > now, "Token must have start time in the future.");
-    require(_startTime > promotionPeriods[currentTokenId].endTime, "Token must have start time > most recent token's end time");
-    if(promotionPeriods[currentTokenId].endTime != 0) {
-      require(_startTime - promotionPeriods[currentTokenId].endTime < 7890000, "Token must have start time < 1 year after the most recent token's end time");
+    require(_startTime > tokens[currentTokenId].validPeriod.endTime, "Token must have start time > most recent token's end time");
+    if(tokens[currentTokenId].validPeriod.endTime != 0) {
+      require(_startTime - tokens[currentTokenId].validPeriod.endTime < 7890000, "Token must have start time < 1 year after the most recent token's end time");
     }
     uint256 newTokenId = _getNextTokenId();
     _mint(_to, newTokenId);
     _incrementTokenId();
-    promotionPeriods[newTokenId] = PromotionPeriod(_startTime, _endTime);
-    proposedPools[newTokenId] = PoolProposal(address(0), address(0));
+
     if(_termsVersion > currentTermsVersion) {
       terms[_termsVersion] = _termsHash;
       currentTermsVersion = _termsVersion;
     }
-    termsVersions[newTokenId] = _termsVersion;
-    emit MintedToken(newTokenId, _to, _startTime, _endTime);
+
+    Token memory newToken = Token(
+      Period(_startTime, _endTime),
+      Proposal(address(0), address(0)),
+      _metaHash,
+      _termsVersion,
+      _tokenType
+    );
+    tokens[newTokenId] = newToken;
+
+    emit MintedToken(newTokenId, _to, _startTime, _endTime, _tokenType);
   }
 
   /**
@@ -79,27 +105,27 @@ contract PromotedPool is ERC721Full, Ownable {
     */
   function proposePromotedPool(uint256 _tokenId, address _poolAddress) public {
     require(msg.sender == ownerOf(_tokenId), "You must be the owner of a valid token to propose a promoted pool");
-    require(promotionPeriods[_tokenId].endTime > now, "Sorry, this token has expired");
-    proposedPools[_tokenId].proposedPool = _poolAddress;
-    emit PromotedPoolProposed(_poolAddress, _tokenId, promotionPeriods[_tokenId].startTime, promotionPeriods[_tokenId].endTime);
+    require(tokens[currentTokenId].validPeriod.endTime > now, "Sorry, this token has expired");
+    tokens[currentTokenId].proposal.proposedPool = _poolAddress;
+    emit NewProposalSubmitted(_poolAddress, _tokenId, tokens[currentTokenId].validPeriod.startTime, tokens[currentTokenId].validPeriod.endTime);
   }
 
   /**
     * @dev allows the owner to approve a proposed pool
     */
   function approvePromotedPool(uint256 _tokenId, address _poolAddress) public onlyOwner {
-    require(proposedPools[_tokenId].proposedPool == _poolAddress, "Pool address must match pool proposed by token holder");
-    require(promotionPeriods[_tokenId].endTime > now, "This token has expired");
-    proposedPools[_tokenId].approvedPool = _poolAddress;
-    emit PromotedPoolApproved(_poolAddress, _tokenId, promotionPeriods[_tokenId].startTime, promotionPeriods[_tokenId].endTime);
+    require(tokens[currentTokenId].proposal.proposedPool == _poolAddress, "Pool address must match pool proposed by token holder");
+    require(tokens[currentTokenId].validPeriod.endTime > now, "This token has expired");
+    tokens[currentTokenId].proposal.approvedPool = _poolAddress;
+    emit ProposalApproved(_poolAddress, _tokenId, tokens[currentTokenId].validPeriod.startTime, tokens[currentTokenId].validPeriod.endTime);
   }
 
   /**
     * @dev resets the current promoted pool by setting the approvedPool address to 0
     */
   function resetPromotedPool(uint256 _tokenId) public onlyOwner {
-    proposedPools[_tokenId].approvedPool = address(0);
-    emit PromotedPoolReset(_tokenId);
+    tokens[currentTokenId].proposal.approvedPool = address(0);
+    emit PromotionResetted(_tokenId);
   }
 
   /**
@@ -107,8 +133,8 @@ contract PromotedPool is ERC721Full, Ownable {
     * @return address pool address
     */
   function getPromotedPool() public view returns (address) {
-    if(now >= promotionPeriods[activeTokenId].startTime) {
-      return proposedPools[activeTokenId].approvedPool;
+    if(now >= tokens[activeTokenId].validPeriod.startTime) {
+      return tokens[activeTokenId].proposal.approvedPool;
     } else {
       return address(0);
     }
@@ -119,7 +145,7 @@ contract PromotedPool is ERC721Full, Ownable {
     */
   function setPromotedPool() public {
     require(currentTokenId > activeTokenId, "Mint new token first.");
-    require(now >= promotionPeriods[activeTokenId].endTime, "Current Promotion has not yet expired");
+    require(now >= tokens[activeTokenId].validPeriod.endTime, "Current Promotion has not yet expired");
     ++activeTokenId;
     emit ActiveTokenUpdated(activeTokenId);
   }
@@ -137,7 +163,7 @@ contract PromotedPool is ERC721Full, Ownable {
     * @return uint8 terms version
     */
   function getTermsVersion(uint256 _tokenId) public view returns(uint8) {
-    return termsVersions[_tokenId];
+    return tokens[_tokenId].termsVersion;
   }
 
   /**
@@ -159,7 +185,7 @@ contract PromotedPool is ERC721Full, Ownable {
     * @dev base URI used by tokenURI
     */
   function baseTokenURI() public view returns (string memory) {
-    return "https://nft.blocklytics.org/";
+    return "https://gateway.pinata.cloud/ipfs/";
   }
 
   /**
@@ -169,8 +195,7 @@ contract PromotedPool is ERC721Full, Ownable {
   function tokenURI(uint256 _tokenId) external view returns (string memory) {
     return Strings.strConcat(
         baseTokenURI(),
-        "api/promoted-pools/",
-        Strings.uint2str(_tokenId)
+        tokens[_tokenId].metaHash
     );
   }
 

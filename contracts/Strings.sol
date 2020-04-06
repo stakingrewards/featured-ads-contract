@@ -1,4 +1,4 @@
-pragma solidity ^0.6.4;
+pragma solidity ^0.5.1;
 
 library Strings {
   // via https://github.com/oraclize/ethereum-api/blob/master/oraclizeAPI_0.5.sol

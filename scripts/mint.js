@@ -1,25 +1,28 @@
 const HDWalletProvider = require("@truffle/hdwallet-provider")
 const web3 = require('web3')
 const axios = require('axios')
+require('dotenv').config();
+
 const PRIVATE_KEY = process.env.PRIVATE_KEY
 const INFURA_KEY = process.env.INFURA_KEY
 const NFT_CONTRACT_ADDRESS = process.env.NFT_CONTRACT_ADDRESS
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS
 const NETWORK = process.env.NETWORK
 const TERMS_HASH = process.env.TERMS_HASH
-const TERMS_VERSION = 2
+const TERMS_VERSION = 1
 const NUM_PROMOTED_POOLS = 1
-const TOKEN_VALID_FOR_WEEKS = 2
-const FIRST_TOKEN_START_TIME = "2020-03-02T10:00:01+0000"
+const TOKEN_VALID_FOR_DAYS = 5
+const FIRST_TOKEN_START_TIME = "2020-04-13T00:00:00+0000"
 
 if (!PRIVATE_KEY || !INFURA_KEY || !OWNER_ADDRESS || !NETWORK) {
     console.error("Please set a PRIVATE_KEY, infura key, owner, network, and contract address.")
     return
 }
 
-const BASE_URL = "https://nft.blocklytics.org/api/promoted-pools/"
-const STORAGE_BUCKET_URL = "https://storage.googleapis.com/promoted-pools/meta/"
-const TOKEN_VALID_FOR_SECONDS = TOKEN_VALID_FOR_WEEKS * 7 * 24 * 60 * 60;
+const BASE_URL = "https://nft.stakingrewards.com/api/stakingrewards-token/"
+const STORAGE_BUCKET_URL = "https://storage.googleapis.com/stakingrewards/stakingrewards-token/meta/"
+const TOKEN_VALID_FOR_SECONDS = TOKEN_VALID_FOR_DAYS * 24 * 60 * 60;
+const TOKEN_TIME_BETWEEN_SECONDS = 2 * 24 * 60 * 60;
 
 const http = axios.create({
     baseURL: BASE_URL
@@ -94,18 +97,18 @@ async function createTokenMetadata(tokenId, startTime, endTime) {
     const startDate = new Date(startTime * 1000);
     const endDate = new Date(endTime * 1000);
     let metadata = {
-        "name": "Pools.fyi Promoted Pool",
-        "description": "Use this token to promote a Uniswap, Bancor or Curve pool on https://pools.fyi between " + startDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + startDate.getUTCDate() + "-" + endDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + endDate.getUTCDate() + ", " + endDate.getUTCFullYear() + ".\n\nRedeem the token at https://pools.fyi/#/redeem?token=" + tokenId + "\n\nDiscord: https://discordapp.com/invite/GFxFN3K\n\nEmail: hello@blocklytics.org\n\nBlog: https://blocklytics.org/blog/fyi-tokens-nfts-digital-ads/\n\nTerms: https://ipfs.io/ipfs/" + TERMS_HASH,
-        "external_url": "https://pools.fyi"
+        "name": "Staking Rewards Token",
+        "description": "Use this token to claim a " + type + " of the day on https://stakingrewards.com frontpage between " + startDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + startDate.getUTCDate() + "-" + endDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + endDate.getUTCDate() + ", " + endDate.getUTCFullYear() + ".\n\nRedeem the token at https://stakingrewards.com/redeem?token=" + tokenId + "\n\nDiscord: https://discordapp.com/invite/EqDF9GF\n\nEmail: info@stakingrewards.com\n\nBlog: https://www.stakingrewards.com/journal/news/srt-nfts-digital-ads/\n\nTerms: https://ipfs.io/ipfs/" + TERMS_HASH,
+        "external_url": "https://stakingrewards.com"
     }
-    metadata.image = STORAGE_BUCKET_URL + tokenId + "/blocklytics-cool.png"
+    metadata.image = STORAGE_BUCKET_URL + tokenId + "/stakingrewards-token.png"
     metadata.attributes = [{
             "trait_type": "token_id",
             "value": tokenId.toString()
         },
         {
             "trait_type": "valid_for",
-            "value": TOKEN_VALID_FOR_WEEKS + " weeks"
+            "value": TOKEN_VALID_FOR_Days + " days"
         },
         {
             "trait_type": "terms_version",
@@ -166,7 +169,7 @@ async function main() {
             } else {
                 console.log("There was an error creating token metadata.")
             }
-            startTime = endTime + 1;
+            startTime = endTime + TOKEN_TIME_BETWEEN_SECONDS;
             console.log("----------------------------------------------------------------------------------")
         }
     }

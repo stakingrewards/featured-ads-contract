@@ -1,4 +1,3 @@
 {
-  "editor.formatOnSave": false,
-  "solidity.compileUsingLocalVersion": "latest"
+  "editor.formatOnSave": false
 }
