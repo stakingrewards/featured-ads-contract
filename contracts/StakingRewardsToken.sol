@@ -185,7 +185,7 @@ contract StakingRewardsToken is ERC721Full, Ownable {
     * @dev base URI used by tokenURI
     */
   function baseTokenURI() public view returns (string memory) {
-    return "https://gateway.pinata.cloud/ipfs/";
+    return "https://ipfs.infura.io:5001/api/v0/cat?arg=";
   }
 
   /**

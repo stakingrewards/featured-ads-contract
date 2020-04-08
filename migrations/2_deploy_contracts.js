@@ -2,7 +2,7 @@ const PromotedPool = artifacts.require("./StakingRewardsToken.sol");
 
 module.exports = function(deployer, network) {
   const tokenName = "Staking Rewards Token"
-  const tokenSymbol = "FYI"
+  const tokenSymbol = "SRT"
   // OpenSea proxy registry addresses for rinkeby and mainnet.
   let proxyRegistryAddress = ""
   if (network === 'rinkeby') {
