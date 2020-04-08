@@ -24,6 +24,9 @@ if (!PRIVATE_KEY || !INFURA_KEY || !OWNER_ADDRESS || !NETWORK || !NFT_CONTRACT_A
 const STORAGE_BUCKET_URL = "https://storage.googleapis.com/stakingrewards-token/meta/"
 const TOKEN_VALID_FOR_SECONDS = TOKEN_VALID_FOR_DAYS * 24 * 60 * 60;
 const TOKEN_TIME_BETWEEN_SECONDS = 2 * 24 * 60 * 60;
+const TOKEN_TYPES = ['Asset', 'Provider', 'Journal']
+
+const TOKEN_TYPE = TOKEN_TYPES[0]
 
 const NFT_ABI = [{
     "constant": false,
@@ -124,7 +127,7 @@ async function createTokenMetadata(tokenId, startTime, endTime, type) {
         },
         {
             "trait_type": "type",
-            "value": "Asset of the Day"
+            "value": `${type} of the Day`
         },
         {
             "trait_type": "promotion_begins",
@@ -178,7 +181,7 @@ async function main() {
         let metadataResult;
 
         try {
-            metadataResult = await createTokenMetadata(currentTokenId, startTime, endTime, 'Asset')
+            metadataResult = await createTokenMetadata(currentTokenId, startTime, endTime, TOKEN_TYPE)
         } catch (e) {
             console.log("There was an error creating token metadata.", e)
             process.exit(1);
@@ -191,7 +194,7 @@ async function main() {
 
         console.log("Token metadata successfully created.", metadataResult.data.Hash);
 
-        let mintResult = await nftContract.methods.mintTo(OWNER_ADDRESS, startTime, endTime, TERMS_HASH, TERMS_VERSION, metadataResult.data.Hash, 0).send({
+        let mintResult = await nftContract.methods.mintTo(OWNER_ADDRESS, startTime, endTime, TERMS_HASH, TERMS_VERSION, metadataResult.data.Hash, TOKEN_TYPES.indexOf(TOKEN_TYPE)).send({
             from: OWNER_ADDRESS,
             gasPrice: "6000000000"
         });
