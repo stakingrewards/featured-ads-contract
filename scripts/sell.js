@@ -31,9 +31,9 @@ const DAI_ADDRESS = '0x6b175474e89094c44da98b954eedeac495271d0f'
 const USDT_ADDRESS = '0xdac17f958d2ee523a2206206994597c13d831ec7'
 const USDC_ADDRESS = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
 
-const RINKEBY_WETH_ADDRESS = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+const RINKEBY_WETH_ADDRESS = '0xc778417e063141139fce010982780140aa0cd5ab'
 
-const tokenIds = ["0", "1"]
+const tokenIds = ["2", "3"]
 
 const mnemonicWalletSubprovider = new MnemonicWalletSubprovider({ mnemonic: MNEMONIC, baseDerivationPath: BASE_DERIVATION_PATH})
 const infuraRpcSubprovider = new RPCSubprovider({
@@ -73,8 +73,8 @@ const dutchAuction = async (tokenId, paymentAddress) => {
             tokenId: tokenId,
             tokenAddress: NFT_CONTRACT_ADDRESS
         },
-        startAmount: .05,
-        endAmount: .01,
+        startAmount: 200,
+        endAmount: 50,
         expirationTime: expirationTime,
         paymentTokenAddress: paymentAddress,
         accountAddress: OWNER_ADDRESS
@@ -101,7 +101,7 @@ const englishAuction = async (tokenId, paymentAddress) => {
 
 async function main() {
 
-    const paymentAddress = NETWORK == 'mainnet' ? DAI_ADDRESS : "0xeF77ce798401dAc8120F77dc2DebD5455eDdACf9"
+    const paymentAddress = NETWORK == 'mainnet' ? DAI_ADDRESS : "0xc3994c5cbddf7ce38b8a2ec2830335fa8f3eea6a"
 
     for (tokenId of tokenIds) {
         try {
