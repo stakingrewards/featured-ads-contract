@@ -14,7 +14,7 @@ const TERMS_HASH = process.env.TERMS_HASH
 const TERMS_VERSION = 1
 const NUM_PROMOTED_POOLS = 2
 const TOKEN_VALID_FOR_DAYS = 5
-const FIRST_TOKEN_START_TIME = "2020-04-13T00:00:00+0000"
+const FIRST_TOKEN_START_TIME = "2020-04-27T00:00:00+0000"
 
 if (!PRIVATE_KEY || !INFURA_KEY || !OWNER_ADDRESS || !NETWORK || !NFT_CONTRACT_ADDRESS) {
     console.error("Please set a PRIVATE_KEY, infura key, owner, network, and contract address.")

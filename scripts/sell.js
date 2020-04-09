@@ -26,6 +26,13 @@ if (!NFT_CONTRACT_ADDRESS) {
 
 const BASE_DERIVATION_PATH = `44'/60'/0'/0`
 
+const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+const DAI_ADDRESS = '0x6b175474e89094c44da98b954eedeac495271d0f'
+const USDT_ADDRESS = '0xdac17f958d2ee523a2206206994597c13d831ec7'
+const USDC_ADDRESS = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+
+const RINKEBY_WETH_ADDRESS = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+
 const tokenIds = ["0", "1"]
 
 const mnemonicWalletSubprovider = new MnemonicWalletSubprovider({ mnemonic: MNEMONIC, baseDerivationPath: BASE_DERIVATION_PATH})
@@ -43,8 +50,7 @@ const seaport = new OpenSeaPort(providerEngine, {
     apiKey: API_KEY
 }, (arg) => console.log(arg))
 
-const simpleAuction = async (tokenId) => {
-    // Example: simple fixed-price sale of an item owned by a user. 
+const simpleAuction = async (tokenId, paymentAddress) => {
     console.log("Auctioning an item for a fixed price...")
     const fixedPriceSellOrder = await seaport.createSellOrder({
         asset: {
@@ -53,13 +59,13 @@ const simpleAuction = async (tokenId) => {
         },
         startAmount: .05,
         expirationTime: 0,
+        paymentTokenAddress: paymentAddress,
         accountAddress: OWNER_ADDRESS
     })    
     console.log(`Successfully created a fixed-price sell order! ${fixedPriceSellOrder.asset.openseaLink}\n`)
 }
 
-const dutchAuction = async (tokenId) => {
-    // // Example: Dutch auction.
+const dutchAuction = async (tokenId, paymentAddress) => {
     console.log("Dutch auctioning an item...")
     const expirationTime = Math.round(Date.now() / 1000 + 60 * 60 * 24)
     const dutchAuctionSellOrder = await seaport.createSellOrder({
@@ -70,15 +76,15 @@ const dutchAuction = async (tokenId) => {
         startAmount: .05,
         endAmount: .01,
         expirationTime: expirationTime,
+        paymentTokenAddress: paymentAddress,
         accountAddress: OWNER_ADDRESS
     })
     console.log(`Successfully created a dutch auction sell order! ${dutchAuctionSellOrder.asset.openseaLink}\n`)
 }
 
-const englishAuction = async (tokenId) => {
-    // Example: English auction.
-    console.log("English auctioning an item in DAI...")
-    const wethAddress = NETWORK == 'mainnet' ? '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' : "0xc778417e063141139fce010982780140aa0cd5ab"
+const englishAuction = async (tokenId, paymentAddress) => {
+    console.log("English auctioning an item...")
+    
     const englishAuctionSellOrder = await seaport.createSellOrder({
         asset: {
             tokenId: tokenId,
@@ -87,7 +93,7 @@ const englishAuction = async (tokenId) => {
         startAmount: .03,
         expirationTime: expirationTime,
         waitForHighestBid: true,
-        paymentTokenAddress: wethAddress,
+        paymentTokenAddress: paymentAddress,
         accountAddress: OWNER_ADDRESS
     })
     console.log(`Successfully created an English auction sell order! ${englishAuctionSellOrder.asset.openseaLink}\n`)
@@ -95,17 +101,19 @@ const englishAuction = async (tokenId) => {
 
 async function main() {
 
+    const paymentAddress = NETWORK == 'mainnet' ? DAI_ADDRESS : "0xeF77ce798401dAc8120F77dc2DebD5455eDdACf9"
+
     for (tokenId of tokenIds) {
         try {
             switch (AUCTION_TYPE) {
                 case 'simple':
-                    await simpleAuction(tokenId)
+                    await simpleAuction(tokenId, paymentAddress)
                     break;
                 case 'dutch':
-                    await dutchAuction(tokenId)
+                    await dutchAuction(tokenId, paymentAddress)
                     break;
                 case 'english':
-                    await englishAuction(tokenId)
+                    await englishAuction(tokenId, paymentAddress)
                     break;
             }
         } catch (e) {
