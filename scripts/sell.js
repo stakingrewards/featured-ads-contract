@@ -33,7 +33,7 @@ const USDC_ADDRESS = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
 
 const RINKEBY_WETH_ADDRESS = '0xc778417e063141139fce010982780140aa0cd5ab'
 
-const tokenIds = ["2", "3"]
+const tokenIds = ["1", "2"]
 
 const mnemonicWalletSubprovider = new MnemonicWalletSubprovider({ mnemonic: MNEMONIC, baseDerivationPath: BASE_DERIVATION_PATH})
 const infuraRpcSubprovider = new RPCSubprovider({
@@ -101,7 +101,7 @@ const englishAuction = async (tokenId, paymentAddress) => {
 
 async function main() {
 
-    const paymentAddress = NETWORK == 'mainnet' ? DAI_ADDRESS : "0xc3994c5cbddf7ce38b8a2ec2830335fa8f3eea6a"
+    const paymentAddress = NETWORK == 'mainnet' ? DAI_ADDRESS : RINKEBY_WETH_ADDRESS
 
     for (tokenId of tokenIds) {
         try {
