@@ -12,9 +12,7 @@ const OWNER_ADDRESS = process.env.OWNER_ADDRESS
 const NETWORK = process.env.NETWORK
 const TERMS_HASH = process.env.TERMS_HASH
 const TERMS_VERSION = 1
-const NUM_PROMOTED_POOLS = 2
 const TOKEN_VALID_FOR_DAYS = 5
-const FIRST_TOKEN_START_TIME = "2020-04-27T00:00:00+0000"
 
 if (!PRIVATE_KEY || !INFURA_KEY || !OWNER_ADDRESS || !NETWORK || !NFT_CONTRACT_ADDRESS) {
     console.error("Please set a PRIVATE_KEY, infura key, owner, network, and contract address.")
@@ -27,6 +25,8 @@ const TOKEN_TIME_BETWEEN_SECONDS = 2 * 24 * 60 * 60;
 const TOKEN_TYPES = ['Asset', 'Provider', 'Journal']
 
 const TOKEN_TYPE = TOKEN_TYPES[0]
+const NUM_ADS = 1
+const FIRST_TOKEN_START_TIME = "2020-04-10T10:05:00+0000"
 
 const NFT_ABI = [{
     "constant": false,
@@ -112,7 +112,7 @@ async function createTokenMetadata(tokenId, startTime, endTime, type) {
         "description": "Buy this token to feature an " + type + " on https://stakingrewards.com between " + startDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + startDate.getUTCDate() + "-" + endDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + endDate.getUTCDate() + ", " + endDate.getUTCFullYear() + ".\n\nNOTE: The "+ type +" must be listed on Staking Rewards already.\n\nRedeem the token at https://stakingrewards.com/redeem?token=" + tokenId + "\n\nDiscord: https://discordapp.com/invite/EqDF9GF\n\nEmail: info@stakingrewards.com\n\nBlog: https://www.stakingrewards.com/journal/news/srt-nfts-digital-ads/\n\nTerms: https://ipfs.io/ipfs/" + TERMS_HASH,
         "external_url": "https://stakingrewards.com"
     }
-    metadata.image = STORAGE_BUCKET_URL + tokenId + "/image.png"
+    metadata.image = STORAGE_BUCKET_URL + tokenId + "/image.gif"
     metadata.attributes = [{
             "trait_type": "token_id",
             "value": tokenId.toString()
@@ -174,14 +174,14 @@ async function main() {
     });
     let currentTokenId = parseInt(currentTokenIdResult)
 
-    for (var i = 0; i < NUM_PROMOTED_POOLS; i++) {
+    for (var i = 0; i < NUM_ADS; i++) {
         let endTime = startTime + TOKEN_VALID_FOR_SECONDS;
         console.log("Minting new token...")
 
         let metadataResult;
 
         try {
-            metadataResult = await createTokenMetadata(currentTokenId, startTime, endTime, TOKEN_TYPE)
+            metadataResult = await createTokenMetadata(currentTokenId + 1, startTime, endTime, TOKEN_TYPE)
         } catch (e) {
             console.log("There was an error creating token metadata.", e)
             process.exit(1);
@@ -199,7 +199,7 @@ async function main() {
             gasPrice: "6000000000"
         });
 
-        console.log("Minted NFT. Transaction: " + mintResult.transactionHash)
+        console.log("Minted NFT Transaction: " + mintResult.transactionHash)
         currentTokenId++
 
         let tokenURIResult = await nftContract.methods.tokenURI(currentTokenId).call({

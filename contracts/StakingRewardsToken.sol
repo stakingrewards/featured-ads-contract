@@ -18,8 +18,13 @@ contract StakingRewardsToken is ERC721Full, Ownable {
   using Strings for string;
 
   address proxyRegistryAddress;
+
   uint256 public currentTokenId;
-  uint256 public activeTokenId;
+
+  uint256 public currentAssetTokenId;
+  uint256 public currentProviderTokenId;
+  uint256 public currentArticleTokenId;
+
   uint8 public currentTermsVersion;
 
   enum TokenType { Asset, Provider, Article }
@@ -36,7 +41,7 @@ contract StakingRewardsToken is ERC721Full, Ownable {
 
   struct Token {
     Period validPeriod;
-    Proposal proposal;
+    string claimedAdSlug;
     string metaHash;
     uint8 termsVersion;
     TokenType tokenType;
@@ -46,10 +51,13 @@ contract StakingRewardsToken is ERC721Full, Ownable {
   mapping (uint8 => string) terms;
 
   event MintedToken(uint256 indexed tokenId, address indexed tokenOwner, uint256 indexed startTime, uint256 endTime, TokenType tokenType);
-  event NewProposalSubmitted(address indexed poolAddress, uint256 indexed tokenId, uint256 indexed startTime, uint256 endTime);
-  event ProposalApproved(address indexed poolAddress, uint256 indexed tokenId, uint256 indexed startTime, uint256 endTime);
-  event ActiveTokenUpdated(uint256 indexed tokenId);
-  event PromotionResetted(uint256 indexed tokenId);
+  event NewAdClaimed(string indexed slug, uint256 indexed tokenId, uint256 indexed startTime, uint256 endTime);
+  event AdResetted(uint256 indexed tokenId);
+  event CurrentAdUpdated(
+    uint256 indexed currentAssetTokenId,
+    uint256 indexed currentProviderTokenId,
+    uint256 indexed currentArticleTokenId
+  );
 
   constructor(string memory _name, string memory _symbol, address _proxyRegistryAddress) ERC721Full(_name, _symbol) public {
     proxyRegistryAddress = _proxyRegistryAddress;
@@ -75,10 +83,16 @@ contract StakingRewardsToken is ERC721Full, Ownable {
     TokenType _tokenType
   ) public onlyOwner {
     require(_startTime > now, "Token must have start time in the future.");
-    require(_startTime > tokens[currentTokenId].validPeriod.endTime, "Token must have start time > most recent token's end time");
-    if(tokens[currentTokenId].validPeriod.endTime != 0) {
-      require(_startTime - tokens[currentTokenId].validPeriod.endTime < 7890000, "Token must have start time < 1 year after the most recent token's end time");
+
+    string memory tokenBeforeCurrentErrorMsg = "Token must have start time > most recent token's end time";
+    if(_tokenType == TokenType.Asset) {
+      require(_startTime > tokens[currentAssetTokenId].validPeriod.endTime, tokenBeforeCurrentErrorMsg);
+    } else if (_tokenType == TokenType.Provider) {
+      require(_startTime > tokens[currentProviderTokenId].validPeriod.endTime, tokenBeforeCurrentErrorMsg);
+    } else if (_tokenType == TokenType.Provider) {
+      require(_startTime > tokens[currentArticleTokenId].validPeriod.endTime, tokenBeforeCurrentErrorMsg);
     }
+
     uint256 newTokenId = _getNextTokenId();
     _mint(_to, newTokenId);
     _incrementTokenId();
@@ -88,66 +102,81 @@ contract StakingRewardsToken is ERC721Full, Ownable {
       currentTermsVersion = _termsVersion;
     }
 
-    Token memory newToken = Token(
+    tokens[newTokenId] = Token(
       Period(_startTime, _endTime),
-      Proposal(address(0), address(0)),
+      "",
       _metaHash,
       _termsVersion,
       _tokenType
     );
-    tokens[newTokenId] = newToken;
 
     emit MintedToken(newTokenId, _to, _startTime, _endTime, _tokenType);
   }
 
   /**
-    * @dev allows token holder to propose a pool to promote
+    * @dev allows token holder to claim an ad
     */
-  function proposePromotedPool(uint256 _tokenId, address _poolAddress) public {
-    require(msg.sender == ownerOf(_tokenId), "You must be the owner of a valid token to propose a promoted pool");
-    require(tokens[currentTokenId].validPeriod.endTime > now, "Sorry, this token has expired");
-    tokens[currentTokenId].proposal.proposedPool = _poolAddress;
-    emit NewProposalSubmitted(_poolAddress, _tokenId, tokens[currentTokenId].validPeriod.startTime, tokens[currentTokenId].validPeriod.endTime);
-  }
+  function claimAd(uint256 _tokenId, string memory _slug) public {
+    require(msg.sender == ownerOf(_tokenId), "You must be the owner of a valid token to claim your featured ad");
+    require(_isExpired(_tokenId), "Sorry, this token has expired");
 
-  /**
-    * @dev allows the owner to approve a proposed pool
-    */
-  function approvePromotedPool(uint256 _tokenId, address _poolAddress) public onlyOwner {
-    require(tokens[currentTokenId].proposal.proposedPool == _poolAddress, "Pool address must match pool proposed by token holder");
-    require(tokens[currentTokenId].validPeriod.endTime > now, "This token has expired");
-    tokens[currentTokenId].proposal.approvedPool = _poolAddress;
-    emit ProposalApproved(_poolAddress, _tokenId, tokens[currentTokenId].validPeriod.startTime, tokens[currentTokenId].validPeriod.endTime);
+    tokens[_tokenId].claimedAdSlug = _slug;
+    emit NewAdClaimed(_slug, _tokenId, tokens[_tokenId].validPeriod.startTime, tokens[_tokenId].validPeriod.endTime);
   }
 
   /**
     * @dev resets the current promoted pool by setting the approvedPool address to 0
     */
-  function resetPromotedPool(uint256 _tokenId) public onlyOwner {
-    tokens[currentTokenId].proposal.approvedPool = address(0);
-    emit PromotionResetted(_tokenId);
+  function resetClaimedAd(uint256 _tokenId) public onlyOwner {
+    tokens[_tokenId].claimedAdSlug = "";
+    emit AdResetted(_tokenId);
   }
 
   /**
-    * @dev gets the current promoted pool
-    * @return address pool address
+    * @dev gets the active ad
+    * @return promoted slug for ad type
     */
-  function getPromotedPool() public view returns (address) {
-    if(now >= tokens[activeTokenId].validPeriod.startTime) {
-      return tokens[activeTokenId].proposal.approvedPool;
-    } else {
-      return address(0);
+  function getCurrentAd(TokenType _tokenType) public view returns (string memory) {
+    if (_tokenType == TokenType.Asset) {
+      return _getCurrentSlug(currentAssetTokenId);
+    } else if (_tokenType == TokenType.Provider) {
+      return _getCurrentSlug(currentProviderTokenId);
+    } else if (_tokenType == TokenType.Article) {
+      return _getCurrentSlug(currentArticleTokenId);
     }
+    return "";
   }
 
   /**
-    * @dev sets the promoted pool returned by getPromotedPool by incrementing activeTokenId
+    * @dev updates the current ads
+    * @return promoted slug for ad type
     */
-  function setPromotedPool() public {
-    require(currentTokenId > activeTokenId, "Mint new token first.");
-    require(now >= tokens[activeTokenId].validPeriod.endTime, "Current Promotion has not yet expired");
-    ++activeTokenId;
-    emit ActiveTokenUpdated(activeTokenId);
+  function updateAds() public {
+    if (_isExpired(currentAssetTokenId) || currentAssetTokenId == 0) {
+      currentAssetTokenId = _getNextClaimedTokenId(currentAssetTokenId, TokenType.Asset);
+    } else if (_isExpired(currentProviderTokenId) || currentProviderTokenId == 0) {
+      currentProviderTokenId = _getNextClaimedTokenId(currentProviderTokenId, TokenType.Provider);
+    } else if (_isExpired(currentArticleTokenId) || currentArticleTokenId == 0) {
+      currentArticleTokenId = _getNextClaimedTokenId(currentArticleTokenId, TokenType.Article);
+    }
+
+    emit CurrentAdUpdated(currentAssetTokenId, currentProviderTokenId, currentArticleTokenId);
+  }
+
+  function getCurrentAsset() public view returns(uint256) {
+    return currentAssetTokenId;
+  }
+
+  function getCurrent() public view returns(uint256) {
+    return currentTokenId;
+  }
+
+  function getStartdate(uint256 _id) public view returns(uint256) {
+    return tokens[_id].validPeriod.startTime;
+  }
+
+  function getNow() public view returns(uint256) {
+    return now;
   }
 
   /**
@@ -179,6 +208,24 @@ contract StakingRewardsToken is ERC721Full, Ownable {
     */
   function _incrementTokenId() private  {
     currentTokenId++;
+  }
+
+  function _isExpired(uint256 _id) private view returns (bool) {
+    return tokens[_id].validPeriod.endTime > now;
+  }
+
+  function _getCurrentSlug(uint256 _id) private view returns (string memory) {
+    require (tokens[_id].validPeriod.startTime <= now && tokens[_id].validPeriod.startTime != 0, "no valid token found");
+    return tokens[_id].claimedAdSlug;
+  }
+
+  function _getNextClaimedTokenId(uint256 _id, TokenType _tokenType) private view returns (uint256) {
+    for (uint256 i = _id + 1; i <= currentTokenId; i++) {
+      if (tokens[i].tokenType == _tokenType) {
+        return i;
+      }
+    }
+    return _id;
   }
 
   /**
