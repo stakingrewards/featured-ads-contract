@@ -28,81 +28,7 @@ const TOKEN_TYPE = TOKEN_TYPES[0]
 const NUM_ADS = 1
 const FIRST_TOKEN_START_TIME = "2020-04-14T06:28:00+0000"
 
-const NFT_ABI = [{
-    "constant": false,
-    "inputs": [
-        {
-            "internalType": "address",
-            "name": "_to",
-            "type": "address"
-        },
-        {
-            "internalType": "uint256",
-            "name": "_startTime",
-            "type": "uint256"
-        },
-        {
-            "internalType": "uint256",
-            "name": "_endTime",
-            "type": "uint256"
-        },
-        {
-            "internalType": "string",
-            "name": "_termsHash",
-            "type": "string"
-        },
-        {
-            "internalType": "uint8",
-            "name": "_termsVersion",
-            "type": "uint8"
-        },
-        {
-            "internalType": "string",
-            "name": "_metaHash",
-            "type": "string"
-        },
-        {
-            "internalType": "enum StakingRewardsToken.TokenType",
-            "name": "_tokenType",
-            "type": "uint8"
-        }
-    ],
-    "name": "mintTo",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-}, {
-    "constant": true,
-    "inputs": [],
-    "name": "currentTokenId",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  }, {
-    "constant": true,
-    "inputs": [{
-        "internalType": "uint256",
-        "name": "_tokenId",
-        "type": "uint256"
-    }],
-    "name": "tokenURI",
-    "outputs": [{
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-    }],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-}]
+const CONTRACT = JSON.parse(fs.readFileSync('./build/contracts/StakingRewardsToken.json'))
 
 async function createTokenMetadata(tokenId, startTime, endTime, type) {
     const startDate = new Date(startTime * 1000);
@@ -166,7 +92,7 @@ async function main() {
         provider
     )
 
-    const nftContract = new web3Instance.eth.Contract(NFT_ABI, NFT_CONTRACT_ADDRESS, {
+    const nftContract = new web3Instance.eth.Contract(CONTRACT.abi, NFT_CONTRACT_ADDRESS, {
         gasLimit: "1000000"
     })
     let currentTokenIdResult = await nftContract.methods.currentTokenId().call({
