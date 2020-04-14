@@ -50,11 +50,14 @@ async function main() {
         console.log(e)
         process.exit(1)
     }
-    
 
-    let current;
+    let currentAsset;
+    let currentProvider;
     try {
-        current = await nftContract.methods.getCurrentAd(0).call({
+        currentAsset = await nftContract.methods.getCurrentAd(0).call({
+            from: OWNER_ADDRESS
+        });
+        currentProvider = await nftContract.methods.getCurrentAd(1).call({
             from: OWNER_ADDRESS
         });
     } catch (e) {
@@ -62,7 +65,8 @@ async function main() {
         process.exit(1)
     }
 
-    console.log(`Current Ad: ${current}`)
+    console.log(`Current Asset Ad: ${currentAsset}`)
+    console.log(`Current Provider Ad: ${currentProvider}`)
     
     process.exit(0);
 }

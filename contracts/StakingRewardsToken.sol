@@ -12,7 +12,7 @@ contract ProxyRegistry {
 
 /**
  * @title Staking Rewards Token
- * Staking Rewards Token - ERC721 contract that gives the holder the right to define either the asset of the day on stakingrewards.com.
+ * Staking Rewards Token - ERC721 contract that gives the holder the right to define a featured ad at stakingrewards.com.
  */
 contract StakingRewardsToken is ERC721Full, Ownable {
   using Strings for string;
@@ -89,7 +89,7 @@ contract StakingRewardsToken is ERC721Full, Ownable {
       require(_startTime > tokens[currentAssetTokenId].validPeriod.endTime, tokenBeforeCurrentErrorMsg);
     } else if (_tokenType == TokenType.Provider) {
       require(_startTime > tokens[currentProviderTokenId].validPeriod.endTime, tokenBeforeCurrentErrorMsg);
-    } else if (_tokenType == TokenType.Provider) {
+    } else if (_tokenType == TokenType.Article) {
       require(_startTime > tokens[currentArticleTokenId].validPeriod.endTime, tokenBeforeCurrentErrorMsg);
     }
 
@@ -134,7 +134,7 @@ contract StakingRewardsToken is ERC721Full, Ownable {
 
   /**
     * @dev gets the active ad
-    * @return promoted slug for ad type
+    * @return slug for ad type
     */
   function getCurrentAd(TokenType _tokenType) public view returns (string memory) {
     if (_tokenType == TokenType.Asset) {
@@ -149,14 +149,15 @@ contract StakingRewardsToken is ERC721Full, Ownable {
 
   /**
     * @dev updates the current ads
-    * @return promoted slug for ad type
     */
   function updateAds() public {
     if (_isExpired(currentAssetTokenId) || currentAssetTokenId == 0) {
       currentAssetTokenId = _getNextClaimedTokenId(currentAssetTokenId, TokenType.Asset);
-    } else if (_isExpired(currentProviderTokenId) || currentProviderTokenId == 0) {
+    }
+    if (_isExpired(currentProviderTokenId) || currentProviderTokenId == 0) {
       currentProviderTokenId = _getNextClaimedTokenId(currentProviderTokenId, TokenType.Provider);
-    } else if (_isExpired(currentArticleTokenId) || currentArticleTokenId == 0) {
+    }
+    if (_isExpired(currentArticleTokenId) || currentArticleTokenId == 0) {
       currentArticleTokenId = _getNextClaimedTokenId(currentArticleTokenId, TokenType.Article);
     }
 
