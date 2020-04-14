@@ -33,7 +33,7 @@ async function main() {
             from: OWNER_ADDRESS,
             gasPrice: "6000000000"
         });
-        console.log(result.events.returnValues)
+        console.log(result.events)
     } catch (e) {
         console.log(e)
         process.exit(1)
@@ -41,11 +41,11 @@ async function main() {
 
     try {
         console.log("Updating Ads...")
-        let result = await nftContract.methods.updateAds(0).send({
+        let result = await nftContract.methods.updateAds().send({
             from: OWNER_ADDRESS,
             gasPrice: "6000000000"
         });
-        console.log(result.events.returnValues)
+        console.log(result.events)
     } catch (e) {
         console.log(e)
         process.exit(1)
@@ -62,7 +62,7 @@ async function main() {
         process.exit(1)
     }
 
-    console.log(current)
+    console.log(`Current Ad: ${current}`)
     
     process.exit(0);
 }

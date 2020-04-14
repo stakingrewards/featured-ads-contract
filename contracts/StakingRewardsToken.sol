@@ -163,22 +163,6 @@ contract StakingRewardsToken is ERC721Full, Ownable {
     emit CurrentAdUpdated(currentAssetTokenId, currentProviderTokenId, currentArticleTokenId);
   }
 
-  function getCurrentAsset() public view returns(uint256) {
-    return currentAssetTokenId;
-  }
-
-  function getCurrent() public view returns(uint256) {
-    return currentTokenId;
-  }
-
-  function getStartdate(uint256 _id) public view returns(uint256) {
-    return tokens[_id].validPeriod.startTime;
-  }
-
-  function getNow() public view returns(uint256) {
-    return now;
-  }
-
   /**
     * @dev gets the hash for the terms and conditions for a given terms version
     * @return string terms hash

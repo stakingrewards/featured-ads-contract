@@ -26,7 +26,7 @@ const TOKEN_TYPES = ['Asset', 'Provider', 'Journal']
 
 const TOKEN_TYPE = TOKEN_TYPES[0]
 const NUM_ADS = 1
-const FIRST_TOKEN_START_TIME = "2020-04-10T10:05:00+0000"
+const FIRST_TOKEN_START_TIME = "2020-04-14T06:28:00+0000"
 
 const NFT_ABI = [{
     "constant": false,
