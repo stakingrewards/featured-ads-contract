@@ -8,7 +8,7 @@
   },
   "author": "Jannik Schmiedl",
   "license": "MIT",
-  "homepage": "https://stakingrewards.com",
+  "homepage": "https://www.stakingrewards.com",
   "dependencies": {
     "@0x/subproviders": "6.0.4",
     "@openzeppelin/contracts": "^2.4.0",

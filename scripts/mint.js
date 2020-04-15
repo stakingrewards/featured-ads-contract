@@ -36,8 +36,8 @@ async function createTokenMetadata(tokenId, startTime, endTime, type) {
     const endDate = new Date(endTime * 1000);
     let metadata = {
         "name": "Staking Rewards",
-        "description": "Buy this token to feature an " + type + " on https://stakingrewards.com between " + startDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + startDate.getUTCDate() + "-" + endDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + endDate.getUTCDate() + ", " + endDate.getUTCFullYear() + ".\n\nNOTE: The "+ type +" must be listed on Staking Rewards already.\n\nRedeem the token at https://stakingrewards.com/redeem?token=" + tokenId + "\n\nDiscord: https://discordapp.com/invite/EqDF9GF\n\nEmail: info@stakingrewards.com\n\nBlog: https://www.stakingrewards.com/journal/news/srt-nfts-digital-ads/\n\nTerms: https://ipfs.io/ipfs/" + TERMS_HASH,
-        "external_url": "https://stakingrewards.com"
+        "description": "Buy this token to feature an " + type + " on https://www.stakingrewards.com between " + startDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + startDate.getUTCDate() + "-" + endDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + endDate.getUTCDate() + ", " + endDate.getUTCFullYear() + ".\n\nNOTE: The "+ type +" must be listed on Staking Rewards already.\n\nRedeem the token at https://www.stakingrewards.com/redeem?token=" + tokenId + "\n\nDiscord: https://discordapp.com/invite/EqDF9GF\n\nEmail: info@stakingrewards.com\n\nBlog: https://www.stakingrewards.com/journal/news/sr-nft-token-for-digital-ads/\n\nTerms: https://ipfs.io/ipfs/" + TERMS_HASH,
+        "external_url": "https://www.stakingrewards.com"
     }
     metadata.image = STORAGE_BUCKET_URL + tokenId + "/image.gif"
     metadata.attributes = [{
