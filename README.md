@@ -81,12 +81,12 @@ node scripts/mint.js
 
 ## Claiming the tokens
 
-The contract offeres functions to claim a token and set the "slug" for your ad, update the current ads and getting the current slug by token type.
-To prepare the claiming script you have to define the token id and slug you want to claim:
+The contract offers a function to claim a token. By claiming a token you can set or update the slug that defines the featured asset or provider.
+Token ID and slug need to be defined for a successful execution.
 
 ```
 TOKEN_ID = <token_id> // the id of the token youre the owner of and want to claim an ad
-AD_SLUG = "<slug>" // the slug of the ad ypu want to claim (needs to be added on stakingrewards.com and fit to the token type)
+AD_SLUG = "<slug>" // the slug of the ad you want to claim (needs to be added on stakingrewards.com and fit to the token type)
 ```
 
 Then run:

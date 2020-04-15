@@ -1,1 +1,1 @@
-./node_modules/.bin/truffle-flattener contracts/PromotedPool.sol > flattened/PromotedPool.sol
+./node_modules/.bin/truffle-flattener contracts/StakingRewardsToken.sol > flattened/StakingRewardsToken.sol

@@ -1,12 +1,12 @@
 {
-  "name": "promoted-pools-contracts",
+  "name": "featured-ads-contract",
   "version": "1.0.0",
-  "description": "Contracts for promoted pool NFT.",
+  "description": "Featured Ads Contract for stakingrewards.com",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Chris Piatt",
+  "author": "Jannik Schmiedl",
   "license": "MIT",
   "homepage": "https://stakingrewards.com",
   "dependencies": {
