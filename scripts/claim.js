@@ -16,6 +16,10 @@ if (!PRIVATE_KEY || !INFURA_KEY || !OWNER_ADDRESS || !NETWORK || !NFT_CONTRACT_A
 
 const CONTRACT = JSON.parse(fs.readFileSync('./build/contracts/StakingRewardsToken.json'))
 
+// individual params to be set for claiming
+const TOKEN_ID = 1
+const AD_SLUG = "tezos"
+
 async function main() {
 
     const provider = new HDWalletProvider(PRIVATE_KEY, `https://${NETWORK}.infura.io/v3/${INFURA_KEY}`)
@@ -29,7 +33,7 @@ async function main() {
 
     try {
         console.log("Claiming Ad...")
-        let result = await nftContract.methods.claimAd(1, "tezos").send({
+        let result = await nftContract.methods.claimAd(TOKEN_ID, AD_SLUG).send({
             from: OWNER_ADDRESS,
             gasPrice: "6000000000"
         });
@@ -38,7 +42,7 @@ async function main() {
         console.log(e)
         process.exit(1)
     }
-
+    
     try {
         console.log("Updating Ads...")
         let result = await nftContract.methods.updateAds().send({
@@ -67,7 +71,7 @@ async function main() {
 
     console.log(`Current Asset Ad: ${currentAsset}`)
     console.log(`Current Provider Ad: ${currentProvider}`)
-    
+
     process.exit(0);
 }
 

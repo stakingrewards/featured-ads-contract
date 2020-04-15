@@ -1,4 +1,4 @@
-# Promoted Pools ERC721 contracts
+# Featured Ads ERC721 contract
 
 ## Installation
 
@@ -15,38 +15,90 @@ sudo xcode-select --switch /Library/Developer/CommandLineTools # Enable command 
 sudo npm explore npm -g -- npm install node-gyp@latest # Update node-gyp
 ```
 
+## Setting token environment variables
+
+For running the scripts you need to set some environment variables first:
+
+```
+INFURA_KEY="<infura_key>" // create an infura account for accressing network
+OWNER_ADDRESS="<metamask_address>" // metamask address which is owner of the contract and newly minted tokens
+PRIVATE_KEY="<metmask_private_key>" // private key of that metamask account
+MNEMONIC="<metmask_mnemonic>" // mnemonic of that metamask account
+NETWORK="<rinkeby|mainnet>" // network youre acting on
+TERMS_HASH="<terms_ipfs_hash>" // ipfs hash of terms file
+NFT_CONTRACT_ADDRESS="<deployed_nft_contract_address>" // deployed contract address
+AUCTION_TYPE="<simple|dutch|english>" // auction type if you want to create sell order on opensea
+```
+
 ## Deploying
 
-### Deploying to the Rinkeby network
+### Deploying
 
 1. You'll need to sign up for [Infura](https://infura.io) and get an API key.
-2. Using your API key and the private key for your Metamask wallet (make sure you're using a Metamask private key that you're comfortable using for testing purposes), run:
+2. Using your API key and the private key for your Metamask wallet (make sure you're using a Metamask private key that is appropriate for your usecase), run:
 
 ```
-export INFURA_KEY="<infura_key>"
-export PRIVATE_KEY="<metmask_private_key>"
-truffle deploy --network rinkeby
+truffle deploy --network development|rinkeby|live
 ```
+
+After deploying, there will be a contract on Ethereum|Rinkeby that will be viewable on [Etherscan](https://etherscan.io). For example, here is a [recently deployed contract](https://rinkeby.etherscan.io/address/0x98f48f7b1f0d9402c375fe1c92f6e114b7508fc4) on rinkeby.
+
+
+## Minting
+
+In order to mint your tokens you have to prepare several things first.
 
 ### Pinning the contract terms to IPFS
 
-You will need an IPFS hash of the most recent terms and conditions (located in the terms directory) in order to mint your tokens.  Each version is specified by the number that serves as the filename.
+You will need an IPFS hash of the most recent terms and conditions (located in the terms directory) in order to mint your tokens. Each version is specified by the number that serves as the filename.
 
-An easy way to pin data to IPFS is to use a service like [Pinata](https://pinata.cloud/pinataupload) to upload the file.  Upload the latest version of the terms, copy the hash that's returned, and then run:
+An easy way to pin data to IPFS is to use a service like [Pinata](https://pinata.cloud/pinataupload) to upload the file. Upload the latest version of the terms, copy the hash that's returned, and put it as env variable.
+
+### Upload the meta images
+
+Your minted tokens will have metadata to be visible in the Opensea marketplace.
+To have an image for each token to be displayed in Opensea, you need to upload them on a publicly facing filestore.
+For Staking Rewards Token, images are stored at https://storage.googleapis.com/stakingrewards-token/meta/<token_id>/image.gif
+
+### Set Token params
+
+Each token is based on a type, startDate and endDate. Those params are stored at token level and also shown in the metadata.
+To prepare the minting script you have to define them individually in the minting script:
 
 ```
-export TERMS_HASH="<ipfs_hash>"
+TOKEN_TYPE = TOKEN_TYPES[<0|1|2>] // type of the tokens you want to mint
+NUM_ADS = 10 // number of tokens you want to mint
+TERMS_VERSION = 1 // terms version
+TOKEN_VALID_FOR_DAYS = 5 // validation period of your tokens, every token to be minted will have its start date after this time
+FIRST_TOKEN_START_TIME = "2020-04-20T00:00:00+0000" // datetime when the first token starts
 ```
 
-### Setting token environment variables
-
-After deploying to the Rinkeby network, there will be a contract on Rinkeby that will be viewable on [Rinkeby Etherscan](https://rinkeby.etherscan.io). For example, here is a [recently deployed contract](https://rinkeby.etherscan.io/address/0x3D0Cb6CC9ddc16e96B26b4a0613bb46667ff2928). You should set this contract address and the address of your Metamask account as environment variables when running the minting script:
+Then run:
 
 ```
-export OWNER_ADDRESS="<my_address>"
-export NFT_CONTRACT_ADDRESS="<deployed_contract_address>"
-export NETWORK="rinkeby"
 node scripts/mint.js
 ```
 
-Note: When running the minting script on mainnet, your environment variable needs to be set to `mainnet` not `live`.  The environment variable affects the Infura URL in the minting script, not truffle. When you deploy, you're using truffle and you need to give truffle an argument that corresponds to the naming in truffle.js (`--network live`).  But when you mint, you're relying on the environment variable you set to build the URL, so you need to use the term that makes Infura happy (`mainnet`).  Truffle and Infura use the same terminology for Rinkeby, but different terminology for mainnet.  If you start your minting script, but nothing happens, double check your environment variables.
+## Claiming the tokens
+
+The contract offeres functions to claim a token and set the "slug" for your ad, update the current ads and getting the current slug by token type.
+To prepare the claiming script you have to define the token id and slug you want to claim:
+
+```
+TOKEN_ID = <token_id> // the id of the token youre the owner of and want to claim an ad
+AD_SLUG = "<slug>" // the slug of the ad ypu want to claim (needs to be added on stakingrewards.com and fit to the token type)
+```
+
+Then run:
+
+```
+node scripts/claim.js
+```
+
+## Selling the Tokens
+
+On Opensea you have several auction/sell options. To activate a special auction type run the sell script by specifying the `tokenIds` const and setting the auction type in your env variables first.
+
+```
+node scripts/sell.js
+```

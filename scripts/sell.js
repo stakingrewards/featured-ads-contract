@@ -33,7 +33,7 @@ const USDC_ADDRESS = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
 
 const RINKEBY_WETH_ADDRESS = '0xc778417e063141139fce010982780140aa0cd5ab'
 
-const tokenIds = ["1"]
+const tokenIds = ["1", "2"]
 
 const mnemonicWalletSubprovider = new MnemonicWalletSubprovider({ mnemonic: MNEMONIC, baseDerivationPath: BASE_DERIVATION_PATH})
 const infuraRpcSubprovider = new RPCSubprovider({
@@ -73,8 +73,8 @@ const dutchAuction = async (tokenId, paymentAddress) => {
             tokenId: tokenId,
             tokenAddress: NFT_CONTRACT_ADDRESS
         },
-        startAmount: 200,
-        endAmount: 50,
+        startAmount: 50,
+        endAmount: 5,
         expirationTime: expirationTime,
         paymentTokenAddress: paymentAddress,
         accountAddress: OWNER_ADDRESS
