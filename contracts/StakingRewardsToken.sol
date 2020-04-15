@@ -111,6 +111,7 @@ contract StakingRewardsToken is ERC721Full, Ownable {
     );
 
     emit MintedToken(newTokenId, _to, _startTime, _endTime, _tokenType);
+    updateAds();
   }
 
   /**
@@ -118,7 +119,7 @@ contract StakingRewardsToken is ERC721Full, Ownable {
     */
   function claimAd(uint256 _tokenId, string memory _slug) public {
     require(msg.sender == ownerOf(_tokenId), "You must be the owner of a valid token to claim your featured ad");
-    require(_isExpired(_tokenId), "Sorry, this token has expired");
+    require(!_isExpired(_tokenId), "Sorry, this token has expired");
 
     tokens[_tokenId].claimedAdSlug = _slug;
     emit NewAdClaimed(_slug, _tokenId, tokens[_tokenId].tokenType, tokens[_tokenId].validPeriod.startTime, tokens[_tokenId].validPeriod.endTime);
@@ -196,11 +197,15 @@ contract StakingRewardsToken is ERC721Full, Ownable {
   }
 
   function _isExpired(uint256 _id) private view returns (bool) {
-    return tokens[_id].validPeriod.endTime > now;
+    return tokens[_id].validPeriod.endTime < now;
+  }
+
+  function _hasStarted(uint256 _id) private view returns (bool) {
+    return tokens[_id].validPeriod.startTime <= now;
   }
 
   function _getCurrentSlug(uint256 _id) private view returns (string memory) {
-    require (tokens[_id].validPeriod.startTime <= now && !_isExpired(_id) && tokens[_id].validPeriod.startTime != 0, "no valid token found");
+    require (_hasStarted(_id) && !_isExpired(_id) && tokens[_id].validPeriod.startTime != 0, "no valid token found");
     return tokens[_id].claimedAdSlug;
   }
 
