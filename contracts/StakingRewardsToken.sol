@@ -166,6 +166,14 @@ contract StakingRewardsToken is ERC721Full, Ownable {
   }
 
   /**
+    * @dev gets the tokenType
+    * @return TokenType
+    */
+  function getTokenType(uint256 _tokenId) public view returns(TokenType) {
+    return tokens[_tokenId].tokenType;
+  }
+
+  /**
     * @dev gets the hash for the terms and conditions for a given terms version
     * @return string terms hash
     */
