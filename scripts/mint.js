@@ -23,7 +23,7 @@ const TOKEN_TYPE = TOKEN_TYPES[0]
 const NUM_ADS = 1
 const TERMS_VERSION = 1
 const TOKEN_VALID_FOR_DAYS = 5
-const FIRST_TOKEN_START_TIME = "2020-04-16T13:24:00+0000"
+const FIRST_TOKEN_START_TIME = "2020-04-27T00:00:00+0000"
 
 const CONTRACT = JSON.parse(fs.readFileSync('./build/contracts/StakingRewardsToken.json'))
 const STORAGE_BUCKET_URL = "https://storage.googleapis.com/stakingrewards-token/meta/"
