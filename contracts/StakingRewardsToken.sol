@@ -51,7 +51,7 @@ contract StakingRewardsToken is ERC721Full, Ownable {
   mapping (uint8 => string) terms;
 
   event MintedToken(uint256 indexed tokenId, address indexed tokenOwner, uint256 indexed startTime, uint256 endTime, TokenType tokenType);
-  event NewAdClaimed(string indexed slug, uint256 indexed tokenId, TokenType indexed tokenType, uint256 startTime, uint256 endTime);
+  event NewAdClaimed(uint256 indexed tokenId, string slug, TokenType tokenType, uint256 startTime, uint256 endTime);
   event AdResetted(uint256 indexed tokenId);
   event CurrentAdUpdated(
     uint256 indexed currentAssetTokenId,
@@ -122,7 +122,7 @@ contract StakingRewardsToken is ERC721Full, Ownable {
     require(!_isExpired(_tokenId), "Sorry, this token has expired");
 
     tokens[_tokenId].claimedAdSlug = _slug;
-    emit NewAdClaimed(_slug, _tokenId, tokens[_tokenId].tokenType, tokens[_tokenId].validPeriod.startTime, tokens[_tokenId].validPeriod.endTime);
+    emit NewAdClaimed(_tokenId, _slug, tokens[_tokenId].tokenType, tokens[_tokenId].validPeriod.startTime, tokens[_tokenId].validPeriod.endTime);
   }
 
   /**
