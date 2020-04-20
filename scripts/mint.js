@@ -19,15 +19,15 @@ if (!PRIVATE_KEY || !INFURA_KEY || !OWNER_ADDRESS || !NETWORK || !NFT_CONTRACT_A
 
 const TOKEN_TYPES = ['Asset', 'Provider', 'Journal']
 // individual params to be set for each minting
-const TOKEN_TYPE = TOKEN_TYPES[0]
-const NUM_ADS = 1
+const TOKEN_TYPE = TOKEN_TYPES[1]
+const NUM_ADS = 2
 const TERMS_VERSION = 1
 const TOKEN_VALID_FOR_DAYS = 5
 const FIRST_TOKEN_START_TIME = "2020-04-27T00:00:00+0000"
 
 const CONTRACT = JSON.parse(fs.readFileSync('./build/contracts/StakingRewardsToken.json'))
 const STORAGE_BUCKET_URL = "https://storage.googleapis.com/stakingrewards-token/meta/"
-const TOKEN_VALID_FOR_SECONDS = TOKEN_VALID_FOR_DAYS * 24 * 60 * 60;
+const TOKEN_VALID_FOR_SECONDS = (TOKEN_VALID_FOR_DAYS * 24 * 60 * 60) - 1;
 const TOKEN_TIME_BETWEEN_SECONDS = 2 * 24 * 60 * 60;
 
 async function createTokenMetadata(tokenId, startTime, endTime, type) {
@@ -35,7 +35,7 @@ async function createTokenMetadata(tokenId, startTime, endTime, type) {
     const endDate = new Date(endTime * 1000);
     let metadata = {
         "name": "Staking Rewards",
-        "description": "Buy this token to feature an " + type + " on https://www.stakingrewards.com between " + startDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + startDate.getUTCDate() + "-" + endDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + endDate.getUTCDate() + ", " + endDate.getUTCFullYear() + ".\n\nNOTE: The "+ type +" must be listed on Staking Rewards already.\n\nRedeem the token at https://www.stakingrewards.com/redeem?id=" + tokenId + "\n\nDiscord: https://discordapp.com/invite/EqDF9GF\n\nEmail: info@stakingrewards.com\n\nBlog: https://www.stakingrewards.com/journal/news/sr-nft-token-for-digital-ads/\n\nTerms: https://ipfs.io/ipfs/" + TERMS_HASH,
+        "description": "Buy this token to feature an " + type + " on https://www.stakingrewards.com between " + startDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + startDate.getUTCDate() + " - " + endDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + endDate.getUTCDate() + ", " + endDate.getUTCFullYear() + ".\n\nNOTE: The "+ type +" must be listed on Staking Rewards already.\n\nRedeem the token at https://www.stakingrewards.com/redeem?id=" + tokenId + "\n\nDiscord: https://discordapp.com/invite/EqDF9GF\n\nEmail: info@stakingrewards.com\n\nBlog: https://www.stakingrewards.com/journal/news/sr-nft-token-for-digital-ads/\n\nTerms: https://ipfs.io/ipfs/" + TERMS_HASH,
         "external_url": "https://www.stakingrewards.com"
     }
     metadata.image = STORAGE_BUCKET_URL + tokenId + "/image.gif"
@@ -93,7 +93,7 @@ async function main() {
     )
 
     const nftContract = new web3Instance.eth.Contract(CONTRACT.abi, NFT_CONTRACT_ADDRESS, {
-        gasLimit: "1000000"
+        gasLimit: "2000000"
     })
     let currentTokenIdResult = await nftContract.methods.currentTokenId().call({
         from: OWNER_ADDRESS
@@ -122,7 +122,7 @@ async function main() {
 
         let mintResult = await nftContract.methods.mintTo(OWNER_ADDRESS, startTime, endTime, TERMS_HASH, TERMS_VERSION, metadataResult.data.Hash, TOKEN_TYPES.indexOf(TOKEN_TYPE)).send({
             from: OWNER_ADDRESS,
-            gasPrice: "6000000000"
+            gasPrice: "9000000000"
         });
 
         console.log("Minted NFT Transaction: " + mintResult.transactionHash)
@@ -139,7 +139,7 @@ async function main() {
             console.log("View on OpenSea: https://" + NETWORK + ".opensea.io/assets/" + NFT_CONTRACT_ADDRESS + "/" + currentTokenId)
         }
 
-        startTime = endTime + TOKEN_TIME_BETWEEN_SECONDS;
+        startTime = endTime + TOKEN_TIME_BETWEEN_SECONDS + 1;
         console.log("----------------------------------------------------------------------------------")
     }
 
