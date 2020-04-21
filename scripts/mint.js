@@ -35,7 +35,7 @@ async function createTokenMetadata(tokenId, startTime, endTime, type) {
     const endDate = new Date(endTime * 1000);
     let metadata = {
         "name": `Staking Rewards Token #${tokenId} - Featured ${type}`,
-        "description": `Use this token to feature ${type == 'Asset' ? 'an ' + type : 'a ' + type} on the https://www.stakingrewards.com Frontpage between ${startDate.toLocaleString('en-us', { timeZone: 'UTC', month: 'short' })} ${startDate.getUTCDate()} - ${endDate.toLocaleString('en-us', { timeZone: 'UTC', month: 'short' })} ${endDate.getUTCDate()}, ${endDate.getUTCFullYear()}.
+        "description": `Use this token to feature ${type == 'Asset' ? 'an ' + type : 'a ' + type} on the https://www.stakingrewards.com frontpage between ${startDate.toLocaleString('en-us', { timeZone: 'UTC', month: 'short' })} ${startDate.getUTCDate()} - ${endDate.toLocaleString('en-us', { timeZone: 'UTC', month: 'short' })} ${endDate.getUTCDate()}, ${endDate.getUTCFullYear()}.
 
 Redeem the token at https://www.stakingrewards.com/redeem?id=${tokenId}
 
@@ -130,7 +130,7 @@ async function main() {
 
         let mintResult = await nftContract.methods.mintTo(OWNER_ADDRESS, startTime, endTime, TERMS_HASH, TERMS_VERSION, metadataResult.data.Hash, TOKEN_TYPES.indexOf(TOKEN_TYPE)).send({
             from: OWNER_ADDRESS,
-            gasPrice: "9000000000"
+            gasPrice: "7000000000"
         });
 
         console.log("Minted NFT Transaction: " + mintResult.transactionHash)
