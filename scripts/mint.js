@@ -34,8 +34,16 @@ async function createTokenMetadata(tokenId, startTime, endTime, type) {
     const startDate = new Date(startTime * 1000);
     const endDate = new Date(endTime * 1000);
     let metadata = {
-        "name": "Staking Rewards",
-        "description": "Buy this token to feature an " + type + " on https://www.stakingrewards.com between " + startDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + startDate.getUTCDate() + " - " + endDate.toLocaleString('default', { timeZone: 'UTC', month: 'short' }) + " " + endDate.getUTCDate() + ", " + endDate.getUTCFullYear() + ".\n\nNOTE: The "+ type +" must be listed on Staking Rewards already.\n\nRedeem the token at https://www.stakingrewards.com/redeem?id=" + tokenId + "\n\nDiscord: https://discordapp.com/invite/EqDF9GF\n\nEmail: info@stakingrewards.com\n\nBlog: https://www.stakingrewards.com/journal/news/sr-nft-token-for-digital-ads/\n\nTerms: https://ipfs.io/ipfs/" + TERMS_HASH,
+        "name": `Staking Rewards Token #${tokenId} - Featured ${type}`,
+        "description": `Use this token to feature ${type == 'Asset' ? 'an ' + type : 'a ' + type} on the https://www.stakingrewards.com Frontpage between ${startDate.toLocaleString('en-us', { timeZone: 'UTC', month: 'short' })} ${startDate.getUTCDate()} - ${endDate.toLocaleString('en-us', { timeZone: 'UTC', month: 'short' })} ${endDate.getUTCDate()}, ${endDate.getUTCFullYear()}.
+
+Redeem the token at https://www.stakingrewards.com/redeem?id=${tokenId}
+
+Blog: https://www.stakingrewards.com/journal/news/decentralized-advertising-with-staking-rewards
+
+Terms: https://ipfs.io/ipfs/${TERMS_HASH}
+
+Discord: https://www.stakingrewards.com/discord`,
         "external_url": "https://www.stakingrewards.com"
     }
     metadata.image = STORAGE_BUCKET_URL + tokenId + "/image.gif"

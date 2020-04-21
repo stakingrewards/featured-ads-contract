@@ -65,7 +65,7 @@ Author: Jannik Schmiedl (@sandburg2011)\n
 Email: jannik@stakingrewards.com\n
 Organization: Staking Rewards (@stakingrewards)\n
 Version: 1.0\n
-Learn More: https://www.stakingrewards.com/journal/news/sr-nft-token-for-digital-ads
+Learn More: https://www.stakingrewards.com/journal/news/decentralized-advertising-with-staking-rewards
 `
   }
 };
